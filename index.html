@@ -1,0 +1,264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f4e79">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Stamps & Stars">
+<title>Stamps & Stars</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f4e79'/%3E%3Cpath d='M32 10l6.5 13.5 14.5 2-10.5 10 2.5 14.5L32 43l-13 7 2.5-14.5-10.5-10 14.5-2z' fill='%23d9a21b'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%231f4e79'/%3E%3Cpath d='M32 10l6.5 13.5 14.5 2-10.5 10 2.5 14.5L32 43l-13 7 2.5-14.5-10.5-10 14.5-2z' fill='%23d9a21b'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Karla:wght@400;500;600&display=swap">
+<style>
+:root {
+  --bg: #f6f4ee; --surface: #ffffff; --fg: #1b2230; --muted: #6b7280; --line: #e2ddd1;
+  --accent: #1f4e79; --accent-ink: #ffffff; --star: #d9a21b; --star-soft: #fff4d6; --danger: #b4452f;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", sans-serif;
+  --body: "Karla", "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1623; --surface: #182236; --fg: #eef1f6; --muted: #98a3b8; --line: #2a3650;
+    --accent: #8fb8e8; --accent-ink: #0f1623; --star: #f2c14e; --star-soft: #2c2a1c; --danger: #e8846c;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body {
+  margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 48px;
+}
+[hidden] { display: none !important; }
+.wrap { max-width: 560px; margin: 0 auto; display: grid; gap: 20px; }
+h1 { font-family: var(--display); font-weight: 700; font-size: clamp(1.8rem, 6vw, 2.4rem); line-height: 1.1; margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+.eyebrow { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--muted); font-weight: 600; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+button, input { font: inherit; }
+input[type=text] { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); }
+input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.btn { border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 600; cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+.btn:focus-visible, .ghost:focus-visible, .check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.ghost { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 6px 8px; border-radius: 8px; font-weight: 500; }
+.ghost:hover { color: var(--fg); background: var(--line); }
+.ghost.danger { color: var(--danger); }
+.lock { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 28px 24px; display: grid; gap: 16px; }
+.lock form { display: grid; gap: 10px; }
+.lock .code { font-family: var(--display); font-size: 1.4rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.err { color: var(--danger); font-size: 0.9rem; min-height: 1.2em; }
+.top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+.codepill { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); }
+.codepill b { font-family: var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--fg); }
+.progress { display: grid; gap: 8px; }
+.bar { height: 8px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--star); transition: width .4s ease; }
+.count { font-variant-numeric: tabular-nums; font-size: 0.9rem; color: var(--muted); }
+.add { display: flex; gap: 8px; }
+.add input { flex: 1; min-width: 0; }
+.filters { display: flex; gap: 4px; }
+.filters .ghost[aria-pressed="true"] { background: var(--line); color: var(--fg); }
+ul.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+li.item { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; }
+li.item.done { background: var(--star-soft); border-color: transparent; }
+.check { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--muted); background: none; cursor: pointer; margin-top: 2px; display: grid; place-items: center; color: var(--star); font-size: 15px; }
+li.done .check { border-color: var(--star); background: var(--surface); }
+.text { min-width: 0; display: grid; gap: 2px; }
+.text .t { font-weight: 500; overflow-wrap: anywhere; }
+li.done .text .t { text-decoration: line-through; color: var(--muted); }
+.text .by { font-size: 0.8rem; color: var(--muted); }
+.confirm { display: flex; gap: 6px; align-items: center; font-size: 0.85rem; }
+.empty { text-align: center; padding: 40px 16px; color: var(--muted); display: grid; gap: 6px; }
+.empty .big { font-family: var(--display); font-size: 1.3rem; color: var(--fg); }
+.note { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <section id="lock" class="lock">
+    <div>
+      <div class="eyebrow">For two people</div>
+      <h1>Stamps &amp; Stars</h1>
+    </div>
+    <p class="muted">Agree on a secret code together. Whoever types the same code sees the same list, and anything either of you adds or ticks off shows up for both.</p>
+    <form id="codeForm">
+      <label class="eyebrow" for="nameInput">Your name</label>
+      <input type="text" id="nameInput" autocomplete="given-name" placeholder="So the other person knows who added what" maxlength="30">
+      <label class="eyebrow" for="codeInput">Shared code</label>
+      <input class="code" type="text" id="codeInput" autocomplete="off" autocapitalize="characters" placeholder="e.g. SUNSET22" maxlength="32">
+      <div class="err" id="codeErr"></div>
+      <button class="btn" type="submit">Open our list</button>
+    </form>
+  </section>
+
+  <section id="app" hidden>
+    <div class="wrap" style="padding:0">
+      <div class="top">
+        <div>
+          <div class="eyebrow">Our bucket list · things we said we'd do</div>
+          <h1>Stamps &amp; Stars</h1>
+        </div>
+        <div class="codepill">code <b id="codeShow"></b> <button class="ghost" id="switchBtn" type="button">change</button> <button class="ghost" id="exportBtn" type="button">export</button></div>
+      </div>
+      <div class="progress">
+        <div class="bar"><i id="barFill"></i></div>
+        <div class="count" id="count">0 of 0 done</div>
+      </div>
+      <form class="add" id="addForm">
+        <input type="text" id="addInput" placeholder="Add something to the list…" maxlength="200" autocomplete="off">
+        <button class="btn" type="submit" id="addBtn">Add</button>
+      </form>
+      <p class="err" id="writeNote"></p>
+      <div class="filters" role="group" aria-label="Filter">
+        <button class="ghost" type="button" data-f="all" aria-pressed="true">All</button>
+        <button class="ghost" type="button" data-f="todo" aria-pressed="false">Still to do</button>
+        <button class="ghost" type="button" data-f="done" aria-pressed="false">Done</button>
+      </div>
+      <ul class="items" id="items"></ul>
+      <div class="empty" id="empty">
+        <div class="big">Nothing here yet</div>
+        <div id="emptyHint">Add the first thing above. Big or small, it counts.</div>
+      </div>
+      <p class="note">Tip: open this same link on the other phone and enter the same code. On iPhone use Share → Add to Home Screen to keep it as an app.</p>
+    </div>
+  </section>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyA2hCSMyTA9h9wlP1TYODpW3rwlS1MNRZ8",
+  authDomain: "stamps-and-stars.firebaseapp.com",
+  projectId: "stamps-and-stars",
+  storageBucket: "stamps-and-stars.firebasestorage.app",
+  messagingSenderId: "894869526145",
+  appId: "1:894869526145:web:678c889ac8b50a95b19f80"
+};
+const db = getFirestore(initializeApp(firebaseConfig));
+
+const $ = id => document.getElementById(id);
+let code = null, listId = null, unsub = null, items = [], filter = "all", myName = "";
+
+async function hashCode(c) {
+  const norm = c.trim().toUpperCase().replace(/\s+/g, "");
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode("stamps-and-stars:" + norm));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+const itemsRef = () => collection(db, "lists", listId, "items");
+
+function remember(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} }
+function recall(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+
+function showLock(msg) {
+  if (unsub) { unsub(); unsub = null; }
+  items = [];
+  $("app").hidden = true; $("lock").hidden = false;
+  $("codeErr").textContent = msg || "";
+  $("codeInput").focus();
+}
+
+async function openList(c, name) {
+  const clean = c.trim();
+  if (clean.replace(/[^a-z0-9]/gi, "").length < 4) { $("codeErr").textContent = "Use at least 4 letters or numbers."; return; }
+  if (!window.crypto || !crypto.subtle) { $("codeErr").textContent = "This browser can't open the list. Try Safari or Chrome."; return; }
+  myName = (name || "").trim().slice(0, 30);
+  code = clean.toUpperCase();
+  listId = await hashCode(code);
+  remember("ssCode", code); remember("ssName", myName);
+  $("codeShow").textContent = code;
+  $("lock").hidden = true; $("app").hidden = false;
+  if (unsub) unsub();
+  unsub = onSnapshot(query(itemsRef(), orderBy("createdAt", "asc")),
+    snap => { items = snap.docs.map(d => ({ id: d.id, ...d.data() })); render(); },
+    err => { $("writeNote").textContent = "Couldn't reach the list: " + (err.code || "connection problem") + ". Reload to try again."; }
+  );
+}
+
+const fmt = ms => new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+
+function render() {
+  const done = items.filter(i => i.done).length;
+  $("count").textContent = done + " of " + items.length + " done";
+  $("barFill").style.width = items.length ? Math.round(100 * done / items.length) + "%" : "0";
+  const shown = items.filter(i => filter === "all" || (filter === "done") === !!i.done);
+  const ul = $("items"); ul.textContent = "";
+  $("empty").hidden = shown.length > 0;
+  $("emptyHint").textContent = items.length ? "Nothing matches this filter." : "Add the first thing above. Big or small, it counts.";
+  for (const it of shown) {
+    const li = document.createElement("li"); li.className = "item" + (it.done ? " done" : "");
+    const chk = document.createElement("button"); chk.className = "check"; chk.type = "button";
+    chk.setAttribute("aria-label", it.done ? "Mark as not done" : "Mark as done");
+    chk.textContent = it.done ? "★" : "";
+    chk.onclick = () => toggle(it);
+    const text = document.createElement("div"); text.className = "text";
+    const t = document.createElement("div"); t.className = "t"; t.textContent = it.title;
+    const by = document.createElement("div"); by.className = "by";
+    by.textContent = "added by " + (it.addedBy || "someone") + (it.createdAt ? " · " + fmt(it.createdAt) : "") + (it.done && it.doneAt ? " · done " + fmt(it.doneAt) : "");
+    text.append(t, by);
+    const del = document.createElement("button"); del.className = "ghost danger"; del.type = "button"; del.textContent = "remove";
+    del.onclick = () => {
+      const box = document.createElement("div"); box.className = "confirm";
+      const yes = document.createElement("button"); yes.className = "ghost danger"; yes.type = "button"; yes.textContent = "Yes, remove";
+      const no = document.createElement("button"); no.className = "ghost"; no.type = "button"; no.textContent = "Keep";
+      yes.onclick = () => deleteDoc(doc(itemsRef(), it.id)).catch(fail);
+      no.onclick = () => box.replaceWith(del);
+      box.append(yes, no); del.replaceWith(box);
+    };
+    li.append(chk, text, del); ul.append(li);
+  }
+}
+
+async function toggle(it) {
+  try { await updateDoc(doc(itemsRef(), it.id), { done: !it.done, doneAt: !it.done ? Date.now() : null }); } catch (e) { fail(e); }
+}
+function fail(e) {
+  $("writeNote").textContent = e && e.code === "permission-denied"
+    ? "The list refused that change. Check the Firestore rules in your Firebase project."
+    : "That didn't save. Check your connection and try again.";
+}
+
+$("codeForm").addEventListener("submit", e => { e.preventDefault(); openList($("codeInput").value, $("nameInput").value); });
+$("switchBtn").addEventListener("click", () => { remember("ssCode", null); showLock(""); });
+$("exportBtn").addEventListener("click", () => {
+  if (!items.length) { $("writeNote").textContent = "Nothing to export yet."; return; }
+  const lines = ["Stamps & Stars — exported " + new Date().toLocaleDateString(), ""];
+  for (const it of items) {
+    lines.push((it.done ? "[x] " : "[ ] ") + it.title + "  (added by " + (it.addedBy || "someone") + (it.createdAt ? " on " + fmt(it.createdAt) : "") + (it.done && it.doneAt ? ", done " + fmt(it.doneAt) : "") + ")");
+  }
+  const blob = new Blob([lines.join("\n")], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "stamps-and-stars-" + new Date().toISOString().slice(0, 10) + ".txt";
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  $("writeNote").textContent = "";
+});
+$("addForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const v = $("addInput").value.trim(); if (!v) return;
+  $("addBtn").disabled = true;
+  try {
+    await addDoc(itemsRef(), { title: v, done: false, createdAt: Date.now(), doneAt: null, addedBy: myName || "someone" });
+    $("addInput").value = ""; $("writeNote").textContent = "";
+  } catch (err) { fail(err); }
+  $("addBtn").disabled = false;
+});
+document.querySelectorAll(".filters .ghost").forEach(b => b.addEventListener("click", () => {
+  filter = b.dataset.f;
+  document.querySelectorAll(".filters .ghost").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  render();
+}));
+
+const savedName = recall("ssName"); if (savedName) $("nameInput").value = savedName;
+const savedCode = recall("ssCode"); if (savedCode) openList(savedCode, savedName || "");
+</script>
+</body>
+</html>
