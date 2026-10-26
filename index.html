@@ -40,8 +40,8 @@ h1 { font-family: var(--display); font-weight: 600; font-size: 1.35rem; line-hei
 p { margin: 0; }
 .muted { color: var(--muted); }
 button, input { font: inherit; }
-input[type=text] { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); }
-input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+input[type=text], input[type=password] { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); }
+input[type=text]:focus, input[type=password]:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
 .btn { border: 0; border-radius: 10px; padding: 11px 18px; font-weight: 500; cursor: pointer; background: var(--accent); color: var(--accent-ink); }
 .btn:focus-visible, .ghost:focus-visible, .check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .btn:disabled { opacity: 0.5; cursor: default; }
@@ -51,6 +51,9 @@ input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: 1px; 
 .lock { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 28px 24px; display: grid; gap: 16px; }
 .lock form { display: grid; gap: 10px; }
 .lock .code { font-size: 1.05rem; letter-spacing: 0.06em; text-transform: uppercase; }
+.coderow { display: flex; gap: 6px; align-items: center; }
+.coderow input { flex: 1; min-width: 0; }
+input[type=password].code { letter-spacing: 0.2em; }
 .err { color: var(--danger); font-size: 0.9rem; min-height: 1.2em; }
 .top { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
 .codepill { display: inline-flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--muted); }
@@ -100,7 +103,7 @@ li.done .text .t { text-decoration: line-through; color: var(--muted); }
       <label class="eyebrow" for="nameInput">Your name</label>
       <input type="text" id="nameInput" autocomplete="given-name" placeholder="So the other person knows who added what" maxlength="30">
       <label class="eyebrow" for="codeInput">Shared code</label>
-      <input class="code" type="text" id="codeInput" autocomplete="off" autocapitalize="characters" placeholder="e.g. SUNSET22" maxlength="32">
+      <div class="coderow"><input class="code" type="password" id="codeInput" autocomplete="off" autocapitalize="characters" placeholder="Enter code" maxlength="32"><button class="ghost" id="showCode" type="button" aria-label="Show code">show</button></div>
       <div class="err" id="codeErr"></div>
       <button class="btn" type="submit">Open list</button>
     </form>
@@ -113,7 +116,7 @@ li.done .text .t { text-decoration: line-through; color: var(--muted); }
           <div class="eyebrow">Things we said we'd do</div>
           <h1>Stamps &amp; Stars</h1>
         </div>
-        <div class="codepill">code <b id="codeShow"></b> <button class="ghost" id="switchBtn" type="button">lock</button> <button class="ghost" id="exportBtn" type="button">export</button></div>
+        <div class="codepill"><button class="ghost" id="switchBtn" type="button">lock</button> <button class="ghost" id="exportBtn" type="button">export</button></div>
       </div>
       <div class="tabs" role="tablist">
         <button class="ghost" type="button" data-tab="list" aria-pressed="true">List</button>
@@ -189,7 +192,7 @@ function showLock(msg) {
   if (unsub) { unsub(); unsub = null; }
   if (unsubNotes) { unsubNotes(); unsubNotes = null; }
   items = []; notes = []; code = null; listId = null;
-  $("codeInput").value = "";
+  $("codeInput").value = ""; $("codeInput").type = "password"; $("showCode").textContent = "show";
   $("app").hidden = true; $("lock").hidden = false;
   $("codeErr").textContent = msg || "";
   $("codeInput").focus();
@@ -204,7 +207,6 @@ async function openList(c, name) {
   remember("ssName", myName);
   code = clean.toUpperCase();
   touch();
-  $("codeShow").textContent = code;
   $("lock").hidden = true; $("app").hidden = false;
   if (unsub) unsub();
   unsub = onSnapshot(query(itemsRef(), orderBy("createdAt", "asc")),
@@ -284,6 +286,12 @@ function fail(e) {
 
 $("codeForm").addEventListener("submit", e => { e.preventDefault(); openList($("codeInput").value, $("nameInput").value); });
 $("switchBtn").addEventListener("click", () => showLock(""));
+$("showCode").addEventListener("click", () => {
+  const i = $("codeInput"), hidden = i.type === "password";
+  i.type = hidden ? "text" : "password";
+  $("showCode").textContent = hidden ? "hide" : "show";
+  i.focus();
+});
 
 // Auto-lock: back to the code screen after 3 minutes without a tap, or when the
 // app has been in the background for more than 1 minute.
