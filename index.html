@@ -85,11 +85,26 @@ li.done .check { border-color: var(--star); background: var(--surface); }
 .text .t { font-weight: 400; overflow-wrap: anywhere; }
 li.done .text .t { text-decoration: line-through; color: var(--muted); }
 .text .by { font-size: 0.8rem; color: var(--muted); }
-.confirm { display: flex; gap: 6px; align-items: center; font-size: 0.85rem; }
+.confirm { grid-column: 1 / -1; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 0.85rem; color: var(--muted); }
+.more { font-size: 1.2rem; line-height: 1; padding: 2px 8px; color: var(--muted); }
+li.item { position: relative; }
+.menu { position: absolute; right: 10px; top: 40px; z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); display: grid; min-width: 140px; overflow: hidden; }
+.menu button { background: none; border: 0; text-align: left; padding: 10px 14px; cursor: pointer; color: var(--fg); }
+.menu button:hover { background: var(--line); }
+.menu button.danger { color: var(--danger); }
+.editrow { grid-column: 2 / -1; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.editrow input { flex: 1; min-width: 140px; padding: 8px 10px; }
+.btn.small { padding: 8px 12px; }
+.check { position: relative; }
+.check.pop { animation: pop .45s ease; }
+@keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+.burst { position: absolute; inset: 0; pointer-events: none; }
+.burst i { position: absolute; left: 50%; top: 50%; width: 5px; height: 5px; margin: -2.5px; border-radius: 50%; background: var(--star); transform: rotate(var(--a)) translateY(0); animation: fly .6s ease-out forwards; }
+@keyframes fly { to { transform: rotate(var(--a)) translateY(-26px) scale(0.3); opacity: 0; } }
 .empty { text-align: center; padding: 40px 16px; color: var(--muted); display: grid; gap: 6px; }
 .empty .big { font-size: 1.05rem; font-weight: 500; color: var(--fg); }
 .note { font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 12px; }
-@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .bar i { transition: none; } .check.pop { animation: none; } }
 </style>
 </head>
 <body>
@@ -252,30 +267,71 @@ function render() {
   $("empty").hidden = shown.length > 0;
   $("emptyHint").textContent = items.length ? "Nothing matches this filter." : "Add the first thing above. Big or small, it counts.";
   for (const it of shown) {
-    const li = document.createElement("li"); li.className = "item" + (it.done ? " done" : "");
+    const li = document.createElement("li"); li.className = "item" + (it.done ? " done" : ""); li.dataset.id = it.id;
     const chk = document.createElement("button"); chk.className = "check"; chk.type = "button";
     chk.setAttribute("aria-label", it.done ? "Mark as not done" : "Mark as done");
-    chk.textContent = it.done ? "★" : "";
-    chk.onclick = () => toggle(it);
+    chk.textContent = it.done ? "\u2605" : "";
+    chk.onclick = () => toggle(it, li);
     const text = document.createElement("div"); text.className = "text";
     const t = document.createElement("div"); t.className = "t"; t.textContent = it.title;
     const by = document.createElement("div"); by.className = "by";
-    by.textContent = "added by " + (it.addedBy || "someone") + (it.createdAt ? " · " + fmt(it.createdAt) : "") + (it.done && it.doneAt ? " · done " + fmt(it.doneAt) : "");
+    by.textContent = "added by " + (it.addedBy || "someone") + (it.createdAt ? " \u00b7 " + fmt(it.createdAt) : "") + (it.done && it.doneAt ? " \u00b7 done " + fmt(it.doneAt) : "");
     text.append(t, by);
-    const del = document.createElement("button"); del.className = "ghost danger"; del.type = "button"; del.textContent = "remove";
-    del.onclick = () => {
-      const box = document.createElement("div"); box.className = "confirm";
-      const yes = document.createElement("button"); yes.className = "ghost danger"; yes.type = "button"; yes.textContent = "Yes, remove";
-      const no = document.createElement("button"); no.className = "ghost"; no.type = "button"; no.textContent = "Keep";
-      yes.onclick = () => deleteDoc(doc(itemsRef(), it.id)).catch(fail);
-      no.onclick = () => box.replaceWith(del);
-      box.append(yes, no); del.replaceWith(box);
-    };
-    li.append(chk, text, del); ul.append(li);
+    const more = document.createElement("button"); more.className = "ghost more"; more.type = "button"; more.textContent = "\u22ef"; more.setAttribute("aria-label", "More");
+    more.onclick = () => openMenu(li, it, more);
+    li.append(chk, text, more); ul.append(li);
   }
 }
 
-async function toggle(it) {
+function closeMenus() { document.querySelectorAll(".menu, .editrow, .confirm").forEach(m => m.remove()); document.querySelectorAll("li.item .text, li.item .more").forEach(t => t.hidden = false); }
+document.addEventListener("pointerdown", e => { if (!e.target.closest(".menu, .more, .editrow, .confirm")) closeMenus(); });
+
+function openMenu(li, it, more) {
+  const had = li.querySelector(".menu"); closeMenus(); if (had) return;
+  const menu = document.createElement("div"); menu.className = "menu";
+  const ed = document.createElement("button"); ed.type = "button"; ed.textContent = "Edit"; ed.onclick = () => startEdit(li, it);
+  const rm = document.createElement("button"); rm.type = "button"; rm.className = "danger"; rm.textContent = "Remove"; rm.onclick = () => askRemove(li, it);
+  menu.append(ed, rm); li.append(menu);
+}
+
+function startEdit(li, it) {
+  closeMenus();
+  const text = li.querySelector(".text"); text.hidden = true; li.querySelector(".more").hidden = true;
+  const row = document.createElement("form"); row.className = "editrow";
+  const inp = document.createElement("input"); inp.type = "text"; inp.value = it.title; inp.maxLength = 200; inp.id = "edit-" + it.id;
+  const save = document.createElement("button"); save.className = "btn small"; save.type = "submit"; save.textContent = "Save";
+  const cancel = document.createElement("button"); cancel.className = "ghost"; cancel.type = "button"; cancel.textContent = "Cancel"; cancel.onclick = closeMenus;
+  row.append(inp, save, cancel);
+  row.onsubmit = async e => {
+    e.preventDefault();
+    const v = inp.value.trim(); if (!v) return;
+    if (v !== it.title) { try { await updateDoc(doc(itemsRef(), it.id), { title: v }); } catch (err) { fail(err); } }
+    closeMenus();
+  };
+  text.after(row); inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length);
+}
+
+function askRemove(li, it) {
+  closeMenus();
+  const box = document.createElement("div"); box.className = "confirm";
+  const q = document.createElement("span"); q.textContent = "Remove this?";
+  const yes = document.createElement("button"); yes.className = "ghost danger"; yes.type = "button"; yes.textContent = "Yes, remove";
+  const no = document.createElement("button"); no.className = "ghost"; no.type = "button"; no.textContent = "Keep"; no.onclick = closeMenus;
+  yes.onclick = () => { closeMenus(); deleteDoc(doc(itemsRef(), it.id)).catch(fail); };
+  box.append(q, yes, no); li.append(box);
+}
+
+function celebrate(li) {
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const chk = li.querySelector(".check"); if (!chk) return;
+  chk.classList.remove("pop"); void chk.offsetWidth; chk.classList.add("pop");
+  const burst = document.createElement("span"); burst.className = "burst";
+  for (let i = 0; i < 8; i++) { const p = document.createElement("i"); p.style.setProperty("--a", (i * 45) + "deg"); burst.append(p); }
+  chk.append(burst); setTimeout(() => burst.remove(), 700);
+}
+
+async function toggle(it, li) {
+  if (!it.done && li) celebrate(li);
   try { await updateDoc(doc(itemsRef(), it.id), { done: !it.done, doneAt: !it.done ? Date.now() : null }); } catch (e) { fail(e); }
 }
 function fail(e) {
