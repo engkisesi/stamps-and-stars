@@ -62,6 +62,16 @@ input[type=text]:focus { outline: 2px solid var(--accent); outline-offset: 1px; 
 .add { display: flex; gap: 8px; }
 .add input { flex: 1; min-width: 0; }
 .filters { display: flex; gap: 4px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tabs .ghost { border-radius: 8px 8px 0 0; padding: 8px 14px; }
+.tabs .ghost[aria-pressed="true"] { color: var(--fg); box-shadow: inset 0 -2px 0 var(--accent); }
+textarea { font: inherit; width: 100%; min-height: 90px; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); resize: vertical; }
+textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.noteform { display: grid; gap: 8px; justify-items: end; }
+.noteform textarea { justify-self: stretch; }
+li.ncard { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 6px; }
+li.ncard .body { white-space: pre-wrap; overflow-wrap: anywhere; }
+li.ncard .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--muted); }
 .filters .ghost[aria-pressed="true"] { background: var(--line); color: var(--fg); }
 ul.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 li.item { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; }
@@ -103,8 +113,13 @@ li.done .text .t { text-decoration: line-through; color: var(--muted); }
           <div class="eyebrow">Things we said we'd do</div>
           <h1>Stamps &amp; Stars</h1>
         </div>
-        <div class="codepill">code <b id="codeShow"></b> <button class="ghost" id="switchBtn" type="button">change</button> <button class="ghost" id="exportBtn" type="button">export</button></div>
+        <div class="codepill">code <b id="codeShow"></b> <button class="ghost" id="switchBtn" type="button">lock</button> <button class="ghost" id="exportBtn" type="button">export</button></div>
       </div>
+      <div class="tabs" role="tablist">
+        <button class="ghost" type="button" data-tab="list" aria-pressed="true">List</button>
+        <button class="ghost" type="button" data-tab="notes" aria-pressed="false">Notes</button>
+      </div>
+      <div id="tabList" class="wrap" style="padding:0">
       <div class="progress">
         <div class="bar"><i id="barFill"></i></div>
         <div class="count" id="count">0 of 0 done</div>
@@ -123,6 +138,19 @@ li.done .text .t { text-decoration: line-through; color: var(--muted); }
       <div class="empty" id="empty">
         <div class="big">Nothing here yet</div>
         <div id="emptyHint">Add the first thing above. Big or small, it counts.</div>
+      </div>
+      </div>
+      <div id="tabNotes" class="wrap" style="padding:0" hidden>
+        <form class="noteform" id="noteForm">
+          <textarea id="noteInput" placeholder="Write a note for both of you: an idea, a date, a link…" maxlength="3000"></textarea>
+          <button class="btn" type="submit" id="noteBtn">Save note</button>
+        </form>
+        <p class="err" id="noteErr"></p>
+        <ul class="items" id="notes"></ul>
+        <div class="empty" id="notesEmpty">
+          <div class="big">No notes yet</div>
+          <div>Save the first one above.</div>
+        </div>
       </div>
       <p class="note">Tip: open this same link on the other phone and enter the same code. On iPhone use Share → Add to Home Screen to keep it as an app.</p>
     </div>
@@ -144,7 +172,7 @@ const firebaseConfig = {
 const db = getFirestore(initializeApp(firebaseConfig));
 
 const $ = id => document.getElementById(id);
-let code = null, listId = null, unsub = null, items = [], filter = "all", myName = "";
+let code = null, listId = null, unsub = null, unsubNotes = null, items = [], notes = [], filter = "all", myName = "";
 
 async function hashCode(c) {
   const norm = c.trim().toUpperCase().replace(/\s+/g, "");
@@ -152,13 +180,15 @@ async function hashCode(c) {
   return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
 }
 const itemsRef = () => collection(db, "lists", listId, "items");
+const notesRef = () => collection(db, "lists", listId, "notes");
 
 function remember(k, v) { try { v ? localStorage.setItem(k, v) : localStorage.removeItem(k); } catch (e) {} }
 function recall(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
 
 function showLock(msg) {
   if (unsub) { unsub(); unsub = null; }
-  items = []; code = null; listId = null;
+  if (unsubNotes) { unsubNotes(); unsubNotes = null; }
+  items = []; notes = []; code = null; listId = null;
   $("codeInput").value = "";
   $("app").hidden = true; $("lock").hidden = false;
   $("codeErr").textContent = msg || "";
@@ -181,6 +211,32 @@ async function openList(c, name) {
     snap => { items = snap.docs.map(d => ({ id: d.id, ...d.data() })); render(); },
     err => { $("writeNote").textContent = "Couldn't reach the list: " + (err.code || "connection problem") + ". Reload to try again."; }
   );
+  if (unsubNotes) unsubNotes();
+  unsubNotes = onSnapshot(query(notesRef(), orderBy("createdAt", "desc")),
+    snap => { notes = snap.docs.map(d => ({ id: d.id, ...d.data() })); renderNotes(); },
+    err => { $("noteErr").textContent = "Couldn't load notes: " + (err.code || "connection problem") + "."; }
+  );
+}
+
+function renderNotes() {
+  const ul = $("notes"); ul.textContent = "";
+  $("notesEmpty").hidden = notes.length > 0;
+  for (const n of notes) {
+    const li = document.createElement("li"); li.className = "ncard";
+    const body = document.createElement("div"); body.className = "body"; body.textContent = n.text;
+    const foot = document.createElement("div"); foot.className = "foot";
+    const meta = document.createElement("span"); meta.textContent = (n.addedBy || "someone") + " · " + (n.createdAt ? new Date(n.createdAt).toLocaleString(undefined, { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" }) : "");
+    const del = document.createElement("button"); del.className = "ghost danger"; del.type = "button"; del.textContent = "remove";
+    del.onclick = () => {
+      const box = document.createElement("span"); box.className = "confirm";
+      const yes = document.createElement("button"); yes.className = "ghost danger"; yes.type = "button"; yes.textContent = "Yes, remove";
+      const no = document.createElement("button"); no.className = "ghost"; no.type = "button"; no.textContent = "Keep";
+      yes.onclick = () => deleteDoc(doc(notesRef(), n.id)).catch(e => { $("noteErr").textContent = "Couldn't remove that note."; });
+      no.onclick = () => box.replaceWith(del);
+      box.append(yes, no); del.replaceWith(box);
+    };
+    foot.append(meta, del); li.append(body, foot); ul.append(li);
+  }
 }
 
 const fmt = ms => new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short" });
@@ -264,6 +320,21 @@ $("addForm").addEventListener("submit", async e => {
     $("addInput").value = ""; $("writeNote").textContent = "";
   } catch (err) { fail(err); }
   $("addBtn").disabled = false;
+});
+document.querySelectorAll(".tabs .ghost").forEach(b => b.addEventListener("click", () => {
+  document.querySelectorAll(".tabs .ghost").forEach(x => x.setAttribute("aria-pressed", String(x === b)));
+  $("tabList").hidden = b.dataset.tab !== "list";
+  $("tabNotes").hidden = b.dataset.tab !== "notes";
+}));
+$("noteForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  const v = $("noteInput").value.trim(); if (!v) return;
+  $("noteBtn").disabled = true;
+  try {
+    await addDoc(notesRef(), { text: v, createdAt: Date.now(), addedBy: myName || "someone" });
+    $("noteInput").value = ""; $("noteErr").textContent = "";
+  } catch (err) { $("noteErr").textContent = err && err.code === "permission-denied" ? "Notes were refused. Paste the updated firestore.rules into Firebase." : "That didn't save. Check your connection and try again."; }
+  $("noteBtn").disabled = false;
 });
 document.querySelectorAll(".filters .ghost").forEach(b => b.addEventListener("click", () => {
   filter = b.dataset.f;
