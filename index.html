@@ -3,12 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1f4e79">
+<meta name="theme-color" content="#f6f4ee" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1623" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Stamps & Stars">
 <title>Stamps & Stars</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231f4e79'/%3E%3Cpath d='M32 10l6.5 13.5 14.5 2-10.5 10 2.5 14.5L32 43l-13 7 2.5-14.5-10.5-10 14.5-2z' fill='%23d9a21b'/%3E%3C/svg%3E">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%231f4e79'/%3E%3Cpath d='M32 10l6.5 13.5 14.5 2-10.5 10 2.5 14.5L32 43l-13 7 2.5-14.5-10.5-10 14.5-2z' fill='%23d9a21b'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAAC8UlEQVR42u3cMVJqQRCGUZ1iH+7G0MiYfbAdY1bg6gysIhFLEbz0332+8AVPmDm356LA49PL4UE617IEgkNwCA7BITgEh+AQHIJDcEhwCA7BITgEh+AQHIJDcAgOCQ7BITgEh+AQHIJDcAgOwSHBITgEx5W9v75ZBDgEx+Vjw/CAQ3C424ADFDgER4FRYXjAITjcYcABDRyCw3iAAx047D0cAMEhOIwEOIQRHILDMIADJjjsNByCw7yBwx7DARYcdtfkkOAwe+BwpsAhOKqMjTkTyOQQHG5f4HArCofgKDw2Jkwjk0Pf9vj0cnDTsH3Pxz0cbgmDbS0XChlVjhUjJOgaW72fHhlhr1b4SFm0e75accQUv5bWzKdNRnUcfBRfnCq/BHPEFLxmluUgozoOPgouQsW/rcw8YgpeG8syecpJOKb5KPtklyXzNJPuOYbcgtTXvyyiJxWMo5+PlKeT8TbBNkdMlvJlcT34JjhyfSQ+7LBjJfGIyZ12wZ9biVj06HMw+0NNxZc+/UVW8LFS+Yjp8dq7ycchS21Gm9/K+KysuuModay0+WOQySE4NBNHwTHe42QxOQSH4BAcAad7g9sOk0NwaBqO4qM7/WQxOQSHRuGIGNrRJ4vJITh0ealvE/yPcX16B9fN//PQ94aZHGf2z3cMfbazBGcpfP7j8K+xW2T0Ow5G33Pc5IK+aOOv/4mJziZOjufj/tKtmjlC1kAZm5FyrMScKbfa2rs/AJOjysCYPELWBBb/sZcTfHT+2qdt9q/gQzI5qmxD41NmtWSx/W619JF0rPxmgN99k358kEGM+kyOIuO90wjx5S3uQvriKLsTDXzE3HN8PctTVj/3kadOjqDrMneE7LDY7DHHvXUoY3KclrXHd5+nKNnFrWyDV1UpOJp8Sa3ckAoOwSE4BIfgEBwSHIJDcAgOwSE4BIfgEByCQ3BIcAgOwSE4BIfgEByCQ3AIDgkOwSE4BIfgEByCQ3AIDsEhwSE49Jc+AEh3AfhAwvZ0AAAAAElFTkSuQmCC">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Karla:wght@400;500;600&display=swap">
 <style>
 :root {
@@ -26,7 +29,10 @@
   }
 }
 * { box-sizing: border-box; }
-html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+html { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); -webkit-text-size-adjust: 100%; overscroll-behavior-y: none; }
+button, input, textarea, label { -webkit-tap-highlight-color: transparent; }
+input, textarea, button { font-size: 16px; }
+button { touch-action: manipulation; }
 body {
   margin: 0; background: var(--bg); color: var(--fg); font-family: var(--body); font-size: 16px; line-height: 1.5;
   padding-left: max(16px, env(safe-area-inset-left, 0px));
@@ -42,10 +48,10 @@ p { margin: 0; }
 button, input { font: inherit; }
 input[type=text], input[type=password] { width: 100%; padding: 12px 14px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--fg); }
 input[type=text]:focus, input[type=password]:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
-.btn { border: 0; border-radius: 10px; padding: 11px 18px; font-weight: 500; cursor: pointer; background: var(--accent); color: var(--accent-ink); }
+.btn { border: 0; border-radius: 10px; padding: 11px 18px; min-height: 44px; font-weight: 500; cursor: pointer; background: var(--accent); color: var(--accent-ink); }
 .btn:focus-visible, .ghost:focus-visible, .check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .btn:disabled { opacity: 0.5; cursor: default; }
-.ghost { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 6px 8px; border-radius: 8px; font-weight: 500; }
+.ghost { background: none; border: 0; color: var(--muted); cursor: pointer; padding: 10px 10px; min-height: 44px; border-radius: 8px; font-weight: 500; }
 .ghost:hover { color: var(--fg); background: var(--line); }
 .ghost.danger { color: var(--danger); }
 .lock { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 28px 24px; display: grid; gap: 16px; }
@@ -77,24 +83,33 @@ li.ncard .body { white-space: pre-wrap; overflow-wrap: anywhere; }
 li.ncard .foot { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--muted); }
 .filters .ghost[aria-pressed="true"] { background: var(--line); color: var(--fg); }
 ul.items { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
-li.item { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; }
+li.item { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 6px 10px 14px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; }
 li.item.done { background: var(--star-soft); border-color: transparent; }
-.check { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--muted); background: none; cursor: pointer; margin-top: 2px; display: grid; place-items: center; color: var(--star); font-size: 15px; }
+.check { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--muted); background: none; cursor: pointer; margin: 0; display: grid; place-items: center; color: var(--star); font-size: 17px; }
+.check::before { content: ""; position: absolute; inset: -9px; }
 li.done .check { border-color: var(--star); background: var(--surface); }
 .text { min-width: 0; display: grid; gap: 2px; }
 .text .t { font-weight: 400; overflow-wrap: anywhere; }
 li.done .text .t { text-decoration: line-through; color: var(--muted); }
 .text .by { font-size: 0.8rem; color: var(--muted); }
 .confirm { grid-column: 1 / -1; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 0.85rem; color: var(--muted); }
-.more { font-size: 1.2rem; line-height: 1; padding: 2px 8px; color: var(--muted); }
+.more { font-size: 1.3rem; line-height: 1; padding: 6px 12px; min-height: 44px; min-width: 44px; color: var(--muted); }
 li.item { position: relative; }
-.menu { position: absolute; right: 10px; top: 40px; z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); display: grid; min-width: 140px; overflow: hidden; }
-.menu button { background: none; border: 0; text-align: left; padding: 10px 14px; cursor: pointer; color: var(--fg); }
+.menu { position: absolute; right: 10px; top: 52px; z-index: 5; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 6px 20px rgba(0,0,0,0.12); display: grid; min-width: 140px; overflow: hidden; }
+.menu button { background: none; border: 0; text-align: left; padding: 12px 16px; min-height: 44px; cursor: pointer; color: var(--fg); }
 .menu button:hover { background: var(--line); }
 .menu button.danger { color: var(--danger); }
 .editrow { grid-column: 2 / -1; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .editrow input { flex: 1; min-width: 140px; padding: 8px 10px; }
 .btn.small { padding: 8px 12px; }
+.btn.danger { background: var(--danger); color: #fff; }
+.removezone { display: grid; justify-items: start; gap: 8px; }
+.removebar { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; display: grid; gap: 10px; font-size: 0.9rem; }
+.removebtns { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.removeconfirm { border-top: 1px solid var(--line); padding-top: 10px; display: grid; gap: 8px; color: var(--danger); }
+li.item.selectable { cursor: pointer; grid-template-columns: auto 1fr; }
+li.item.selected { outline: 2px solid var(--danger); outline-offset: -1px; }
+.sel { width: 24px; height: 24px; margin: 3px 3px 0; accent-color: var(--danger); }
 .check { position: relative; }
 .check.pop { animation: pop .45s ease; }
 @keyframes pop { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
@@ -116,9 +131,9 @@ li.item { position: relative; }
     <p class="muted">Agree on a secret code together. Whoever types the same code sees the same list, and anything either of you adds or ticks off shows up for both.</p>
     <form id="codeForm">
       <label class="eyebrow" for="nameInput">Your name</label>
-      <input type="text" id="nameInput" autocomplete="given-name" placeholder="So the other person knows who added what" maxlength="30">
+      <input type="text" id="nameInput" autocomplete="given-name" enterkeyhint="next" placeholder="So the other person knows who added what" maxlength="30">
       <label class="eyebrow" for="codeInput">Shared code</label>
-      <div class="coderow"><input class="code" type="password" id="codeInput" autocomplete="off" autocapitalize="characters" placeholder="Enter code" maxlength="32"><button class="ghost" id="showCode" type="button" aria-label="Show code">show</button></div>
+      <div class="coderow"><input class="code" type="password" id="codeInput" autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="characters" enterkeyhint="go" placeholder="Enter code" maxlength="32"><button class="ghost" id="showCode" type="button" aria-label="Show code">show</button></div>
       <div class="err" id="codeErr"></div>
       <button class="btn" type="submit">Open list</button>
     </form>
@@ -143,7 +158,7 @@ li.item { position: relative; }
         <div class="count" id="count">0 of 0 done</div>
       </div>
       <form class="add" id="addForm">
-        <input type="text" id="addInput" placeholder="Add something to the list…" maxlength="200" autocomplete="off">
+        <input type="text" id="addInput" placeholder="Add something to the list…" maxlength="200" autocomplete="off" enterkeyhint="done">
         <button class="btn" type="submit" id="addBtn">Add</button>
       </form>
       <p class="err" id="writeNote"></p>
@@ -153,6 +168,23 @@ li.item { position: relative; }
         <button class="ghost" type="button" data-f="done" aria-pressed="false">Done</button>
       </div>
       <ul class="items" id="items"></ul>
+      <div class="removezone">
+        <button class="ghost" id="removeStart" type="button" hidden>Remove items…</button>
+        <div class="removebar" id="removeBar" hidden>
+          <span class="muted">Tap the items to remove, then confirm.</span>
+          <div class="removebtns">
+            <button class="ghost" id="removeCancel" type="button">Cancel</button>
+            <button class="btn danger" id="removeGo" type="button" disabled>Remove</button>
+          </div>
+          <div class="removeconfirm" id="removeConfirm" hidden>
+            <span id="removeConfirmText"></span>
+            <div class="removebtns">
+              <button class="ghost" id="removeNo" type="button">Keep them</button>
+              <button class="btn danger" id="removeYes" type="button">Yes, remove</button>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="empty" id="empty">
         <div class="big">Nothing here yet</div>
         <div id="emptyHint">Add the first thing above. Big or small, it counts.</div>
@@ -277,11 +309,36 @@ function render() {
     const by = document.createElement("div"); by.className = "by";
     by.textContent = "added by " + (it.addedBy || "someone") + (it.createdAt ? " \u00b7 " + fmt(it.createdAt) : "") + (it.done && it.doneAt ? " \u00b7 done " + fmt(it.doneAt) : "");
     text.append(t, by);
+    if (removing) {
+      li.classList.add("selectable"); if (selected.has(it.id)) li.classList.add("selected");
+      const sel = document.createElement("input"); sel.type = "checkbox"; sel.className = "sel"; sel.id = "sel-" + it.id; sel.checked = selected.has(it.id);
+      sel.setAttribute("aria-label", "Select to remove");
+      const pick = () => { selected.has(it.id) ? selected.delete(it.id) : selected.add(it.id); render(); };
+      sel.onchange = pick; chk.disabled = true; chk.onclick = null;
+      li.onclick = e => { if (e.target !== sel) pick(); };
+      li.append(sel, text); ul.append(li);
+      continue;
+    }
     const more = document.createElement("button"); more.className = "ghost more"; more.type = "button"; more.textContent = "\u22ef"; more.setAttribute("aria-label", "More");
     more.onclick = () => openMenu(li, it, more);
     li.append(chk, text, more); ul.append(li);
   }
+  $("removeBar").hidden = !removing;
+  $("removeStart").hidden = removing || !items.length;
+  $("removeGo").disabled = !selected.size;
+  $("removeGo").textContent = selected.size ? "Remove " + selected.size + (selected.size === 1 ? " item" : " items") : "Remove";
+  $("removeConfirm").hidden = true;
 }
+
+let removing = false, selected = new Set();
+$("removeStart").addEventListener("click", () => { removing = true; selected.clear(); closeMenus(); render(); });
+$("removeCancel").addEventListener("click", () => { removing = false; selected.clear(); render(); });
+$("removeGo").addEventListener("click", () => { if (selected.size) { $("removeConfirm").hidden = false; $("removeConfirmText").textContent = "Remove " + selected.size + (selected.size === 1 ? " item" : " items") + " for both of you? This can't be undone."; } });
+$("removeNo").addEventListener("click", () => { $("removeConfirm").hidden = true; });
+$("removeYes").addEventListener("click", async () => {
+  const ids = [...selected]; removing = false; selected.clear(); render();
+  for (const id of ids) { try { await deleteDoc(doc(itemsRef(), id)); } catch (e) { fail(e); } }
+});
 
 function closeMenus() { document.querySelectorAll(".menu, .editrow, .confirm").forEach(m => m.remove()); document.querySelectorAll("li.item .text, li.item .more").forEach(t => t.hidden = false); }
 document.addEventListener("pointerdown", e => { if (!e.target.closest(".menu, .more, .editrow, .confirm")) closeMenus(); });
@@ -290,8 +347,7 @@ function openMenu(li, it, more) {
   const had = li.querySelector(".menu"); closeMenus(); if (had) return;
   const menu = document.createElement("div"); menu.className = "menu";
   const ed = document.createElement("button"); ed.type = "button"; ed.textContent = "Edit"; ed.onclick = () => startEdit(li, it);
-  const rm = document.createElement("button"); rm.type = "button"; rm.className = "danger"; rm.textContent = "Remove"; rm.onclick = () => askRemove(li, it);
-  menu.append(ed, rm); li.append(menu);
+  menu.append(ed); li.append(menu);
 }
 
 function startEdit(li, it) {
@@ -309,16 +365,6 @@ function startEdit(li, it) {
     closeMenus();
   };
   text.after(row); inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length);
-}
-
-function askRemove(li, it) {
-  closeMenus();
-  const box = document.createElement("div"); box.className = "confirm";
-  const q = document.createElement("span"); q.textContent = "Remove this?";
-  const yes = document.createElement("button"); yes.className = "ghost danger"; yes.type = "button"; yes.textContent = "Yes, remove";
-  const no = document.createElement("button"); no.className = "ghost"; no.type = "button"; no.textContent = "Keep"; no.onclick = closeMenus;
-  yes.onclick = () => { closeMenus(); deleteDoc(doc(itemsRef(), it.id)).catch(fail); };
-  box.append(q, yes, no); li.append(box);
 }
 
 function celebrate(li) {
